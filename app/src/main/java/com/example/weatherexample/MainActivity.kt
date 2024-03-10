@@ -4,8 +4,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -16,6 +18,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textViewLocationName: TextView
     private lateinit var editTextLocation: EditText
     private lateinit var buttonSearch: Button
+    private lateinit var imageViewWeather: ImageView
+    private lateinit var textViewDescription: TextView
     private val weatherService = RetrofitServiceFactory.makeRetrofitService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +29,8 @@ class MainActivity : AppCompatActivity() {
         editTextLocation = findViewById(R.id.editTextTextLocation)
         buttonSearch = findViewById(R.id.buttonSearch)
         textViewLocationName = findViewById(R.id.textViewLocationName)
+        imageViewWeather = findViewById(R.id.imageViewWeather)
+        textViewDescription = findViewById(R.id.textViewDescription)
         buttonSearch.setOnClickListener {
             val city = editTextLocation.text.toString()
             textViewLocationName.text = city
@@ -40,7 +46,21 @@ class MainActivity : AppCompatActivity() {
                 city,
                 "metric"
             )
-            textViewTemperature.text = "${response.main.temp.toString()}°C"
+            if (response.isSuccessful) {
+                val body = response.body()!!
+                val description = body.weather.first().description
+                val icon = body.weather.first().icon
+                val urlImage = "https://openweathermap.org/img/wn/$icon@2x.png"
+                Glide
+                    .with(this@MainActivity)
+                    .load(urlImage)
+                    .into(imageViewWeather)
+                textViewDescription.text = description
+                textViewTemperature.text = "${body.main.temp.toString()}°C"
+            } else {
+                textViewLocationName.text = "Hubo un error"
+                textViewTemperature.text = "- °C"
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package com.example.weatherexample
 
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
@@ -13,7 +14,7 @@ interface WeatherService {
         @Query("appid") appId: String,
         @Query("q") city: String,
         @Query("units") units: String,
-    ): WeatherResponse
+    ): Response<WeatherResponse>
 
 }
 
@@ -30,7 +31,13 @@ object RetrofitServiceFactory {
 }
 
 class WeatherResponse (
-    val main: Main
+    val main: Main,
+    val weather: List<Weather>
+)
+
+class Weather(
+    val description: String,
+    val icon: String
 )
 
 class Main(
